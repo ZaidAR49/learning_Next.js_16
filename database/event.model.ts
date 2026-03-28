@@ -111,7 +111,7 @@ const EventSchema = new Schema<IEvent>(
  * 2. Normalize date to ISO format (YYYY-MM-DD)
  * 3. Normalize time to 24-hour format (HH:MM)
  */
-EventSchema.pre('save', function (next) {
+EventSchema.pre('save', function () {
   // Generate slug only if title is new or modified
   if (this.isModified('title')) {
     this.slug = this.title
@@ -127,7 +127,7 @@ EventSchema.pre('save', function (next) {
   if (this.isModified('date')) {
     const parsedDate = new Date(this.date);
     if (isNaN(parsedDate.getTime())) {
-      return next(new Error('Invalid date format'));
+      throw new Error('Invalid date format');
     }
     // Store as ISO date string (YYYY-MM-DD)
     this.date = parsedDate.toISOString().split('T')[0];
@@ -143,11 +143,9 @@ EventSchema.pre('save', function (next) {
       const [hours, minutes] = trimmedTime.split(':');
       this.time = `${hours.padStart(2, '0')}:${minutes}`;
     } else {
-      return next(new Error('Time must be in HH:MM format (24-hour)'));
+      throw new Error('Time must be in HH:MM format (24-hour)');
     }
   }
-
-  next();
 });
 
 // Index on slug for efficient lookups
