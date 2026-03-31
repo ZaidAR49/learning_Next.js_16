@@ -5,51 +5,42 @@ import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaChalkboardTeacher, FaId
 import BookEvent from "@/components/bookevent";
 import { getSimilarEvents } from "@/lib/actions/event.action";
 import Event from "@/components/event";
-const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
-    const { slug } = await params;
-    const similarEvents = await getSimilarEvents(slug);
-    const EventDeatailItem = (item: string) => {
-        switch (item) {
-            case "date":
-                return <div className="flex flex-row gap-2">
-                    <FaCalendar />
-                    <p>{date}</p>
-                </div>
-            case "time":
-                return <div className="flex flex-row gap-2">
-                    <FaClock />
-                    <p>{time}</p>
-                </div>
-            case "location":
-                return <div className="flex flex-row gap-2">
-                    <FaMapMarkerAlt />
-                    <p>{location}</p>
-                </div>
-            case "mode":
-                return <div className="flex flex-row gap-2">
-                    <FaChalkboardTeacher />
-                    <p>{mode}</p>
-                </div>
-            case "audience":
-                return <div className="flex flex-row gap-2">
-                    <FaUsers />
-                    <p>{audience}</p>
-                </div>
-            case "organizer":
-                return <div className="flex flex-row gap-2">
-                    <FaIdBadge />
-                    <p>{organizer}</p>
-                </div>
-            default:
-                return null
-        }
+import { Suspense } from "react";
+
+const EventDetailItem = (item: string, value: string) => {
+    switch (item) {
+        case "date":
+            return <div className="flex flex-row gap-2"><FaCalendar /><p>{value}</p></div>
+        case "time":
+            return <div className="flex flex-row gap-2"><FaClock /><p>{value}</p></div>
+        case "location":
+            return <div className="flex flex-row gap-2"><FaMapMarkerAlt /><p>{value}</p></div>
+        case "mode":
+            return <div className="flex flex-row gap-2"><FaChalkboardTeacher /><p>{value}</p></div>
+        case "audience":
+            return <div className="flex flex-row gap-2"><FaUsers /><p>{value}</p></div>
+        case "organizer":
+            return <div className="flex flex-row gap-2"><FaIdBadge /><p>{value}</p></div>
+        default:
+            return null
     }
+}
+
+async function EventContent({ slug }: { slug: string }) {
+    const similarEvents = await getSimilarEvents(slug);
     const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/events/${slug}`);
-    const { event: { _id, title, image, overview, date, time, location, description, mode, audience, agenda, organizer, tags } } = await response.json();
-    console.log(agenda);
-    if (!title) {
+    
+    if (!response.ok) {
         return notFound();
     }
+    
+    const data = await response.json();
+    if (!data || !data.event || !data.event.title) {
+        return notFound();
+    }
+
+    const { event: { _id, title, image, overview, date, time, location, description, mode, audience, agenda, organizer, tags } } = data;
+
     return (
         <div className="flex flex-row ml-10 my-10 gap-20" id="event">
             <section className="flex flex-col flex-1 w-0">
@@ -65,14 +56,13 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
                     </section>
                     <section className="flex flex-col gap-4">
                         <h2>Event Details</h2>
-                        <p>{overview}</p>
                         <div className="flex flex-col gap-2">
-                            {EventDeatailItem("date")}
-                            {EventDeatailItem("time")}
-                            {EventDeatailItem("location")}
-                            {EventDeatailItem("mode")}
-                            {EventDeatailItem("audience")}
-                            {EventDeatailItem("organizer")}
+                            {EventDetailItem("date", date)}
+                            {EventDetailItem("time", time)}
+                            {EventDetailItem("location", location)}
+                            {EventDetailItem("mode", mode)}
+                            {EventDetailItem("audience", audience)}
+                            {EventDetailItem("organizer", organizer)}
                         </div>
                     </section>
                     <section className="agenda flex flex-col gap-4">
@@ -91,7 +81,6 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
                             ))}
                         </ul>
                     </section>
-                    {/* //in the right side */}
                 </div>
                 <div className="flex w-full flex-col gap-4 pt-20">
                     <h2>Similar Events</h2>
@@ -110,9 +99,17 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
                     <BookEvent id={_id.toString()} />
                 </div>
             </aside>
-
         </div>
-    )
+    );
+}
+
+const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await params;
+    return (
+        <Suspense fallback={<div className="ml-10 my-10 relative">Loading event details...</div>}>
+            <EventContent slug={slug} />
+        </Suspense>
+    );
 }
 
 export default page;
