@@ -59,8 +59,8 @@ BookingSchema.pre('save', async function (next) {
 
 });
 
-// Index on eventId for faster queries (e.g., finding all bookings for an event)
-BookingSchema.index({ eventId: 1 });
+// Compound unique index on eventId and email to prevent duplicate bookings for the same user per event
+BookingSchema.index({ eventId: 1, email: 1 }, { unique: true });
 
 /**
  * Export the Booking model.

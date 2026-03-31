@@ -39,7 +39,7 @@ const BookEvent = ({ id }: { id: string }) => {
         }
         setTimeout(() => {
             setSubmitting(true);
-        }, 1000);
+        }, 500);
     }
     return (
         <div id="book-event">
@@ -48,7 +48,7 @@ const BookEvent = ({ id }: { id: string }) => {
 
                     <form onSubmit={(e) => handleSubmit(e)}>
                         <label htmlFor="email">Email Address</label>
-                        <input type="email" className="border-2 border-gray-600 rounded-md" placeholder=" Enter your email address" value={email} onChange={(e) => setEmail(e.target.value)} id="email" />
+                        <input type="email" className="border-2 border-gray-600 rounded-md" placeholder=" Enter your email address" value={email} onChange={(e) => setEmail(e.target.value)} required id="email" />
                         <button type="submit" className="button-submit">Book Event</button>
                     </form>
                     <p>Number of bookings: {numberOfBookings}</p>
