@@ -1,0 +1,1 @@
+import { connectToDatabase } from "./lib/mongodb"; import Booking from "./database/booking.model"; connectToDatabase().then(async () => { console.log(await Booking.countDocuments({ eventId: "65f23fcbcb8ebc279c6accda" })); process.exit(0); });

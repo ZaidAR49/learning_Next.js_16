@@ -2,10 +2,13 @@ import ExploreBtn from "@/components/explore-btn";
 import Event from "@/components/event";
 import { IEvent } from "@/database";
 import axios from "axios";
+import { cacheLife, cacheTag } from "next/cache";
 const Base_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default async function Home() {
-
+  "use cache";
+  cacheLife('hours');
+  cacheTag('events');
   const response = await axios.get(`${Base_URL}/api/events`);
   const { events } = response.data;
 
@@ -65,7 +68,7 @@ export default async function Home() {
         <h2>Featured Events</h2>
         <ul className="list-none flex flex-row  flex-wrap">
           {events.map((event: IEvent) => (
-            <li key={event.slug} className="flex m-12">
+            <li key={event._id.toString()} className="flex m-12" >
               <Event title={event.title} slug={event.slug} image={event.image} date={event.date} location={event.location} time={event.time} />
             </li>
           ))}
