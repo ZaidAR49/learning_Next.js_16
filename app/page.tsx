@@ -1,16 +1,14 @@
 import ExploreBtn from "@/components/explore-btn";
 import Event from "@/components/event";
 import { IEvent } from "@/database";
-import axios from "axios";
+import { getAllEvents } from "@/lib/actions/event.action";
 import { cacheLife, cacheTag } from "next/cache";
-const Base_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
 export default async function Home() {
   "use cache";
   cacheLife('hours');
   cacheTag('events');
-  const response = await axios.get(`${Base_URL}/api/events`);
-  const { events } = response.data;
+  const events = await getAllEvents();
 
 
   // const events = [

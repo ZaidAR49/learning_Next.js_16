@@ -36,30 +36,32 @@ export default function RootLayout({
       className={cn("min-h-screen", "antialiased", schibstedSans.variable, martianMono.variable, "font-sans", geist.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <PostHogProvider>
-          <Suspense fallback={null}>
-            <PostHogPageView />
-          </Suspense>
-          <Header />
-          <div className="absolute top-0 left-0 inset-0 z-[-1] min-h-screen">
-            <LightRays
-              raysOrigin="top-center-offset"
-              raysColor="#7e57c2"
-              raysSpeed={0.3}
-              lightSpread={2}
-              rayLength={5}
-              followMouse={true}
-              mouseInfluence={0.2}
-              noiseAmount={0}
-              distortion={0}
-              className="custom-rays"
-              pulsating={false}
-              fadeDistance={1}
-              saturation={1}
-            />
-          </div>
-          {children}
-        </PostHogProvider>
+        <Suspense fallback={null}>
+          <PostHogProvider>
+            <Suspense fallback={null}>
+              <PostHogPageView />
+            </Suspense>
+            <Header />
+            <div className="absolute top-0 left-0 inset-0 z-[-1] min-h-screen">
+              <LightRays
+                raysOrigin="top-center-offset"
+                raysColor="#7e57c2"
+                raysSpeed={0.3}
+                lightSpread={2}
+                rayLength={5}
+                followMouse={true}
+                mouseInfluence={0.2}
+                noiseAmount={0}
+                distortion={0}
+                className="custom-rays"
+                pulsating={false}
+                fadeDistance={1}
+                saturation={1}
+              />
+            </div>
+            {children}
+          </PostHogProvider>
+        </Suspense>
       </body>
     </html>
   );

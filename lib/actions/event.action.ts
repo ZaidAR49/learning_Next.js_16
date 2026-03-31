@@ -16,3 +16,14 @@ export const getSimilarEvents = async (slug: string) => {
         return [];
     }
 }
+
+export const getAllEvents = async () => {
+    try {
+        await connectToDatabase();
+        const events = await Event.find();
+        return JSON.parse(JSON.stringify(events));
+    } catch (error) {
+        console.error("Failed to fetch all events:", error);
+        return [];
+    }
+}
