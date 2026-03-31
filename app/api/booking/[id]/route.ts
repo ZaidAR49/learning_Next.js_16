@@ -26,8 +26,14 @@ export async function POST(request: Request, { params }: Props) {
         await newBooking.save();
 
         return NextResponse.json({ message: "Booking successful", booking: newBooking }, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error creating booking:", error);
+        
+        // Handle duplicate key error (E11000)
+        if (error?.code === 11000) {
+            return NextResponse.json({ error: "You have already booked this event" }, { status: 400 });
+        }
+        
         return NextResponse.json({ error: "Failed to book event" }, { status: 500 });
     }
 }

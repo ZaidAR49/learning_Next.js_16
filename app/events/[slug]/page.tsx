@@ -1,13 +1,27 @@
-
-
 import { notFound } from "next/navigation";
 import { FaCalendar, FaClock, FaMapMarkerAlt, FaUsers, FaChalkboardTeacher, FaIdBadge } from "react-icons/fa";
 import BookEvent from "@/components/bookevent";
 import { getSimilarEvents } from "@/lib/actions/event.action";
 import Event from "@/components/event";
-const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
-    const { slug } = await params;
+import { cacheLife, cacheTag } from "next/cache";
+import { Suspense } from "react";
+
+async function EventDetailsContent({ slug }: { slug: string }) {
+    "use cache";
+    cacheLife('hours');
+    cacheTag('event-detail');
+
     const similarEvents = await getSimilarEvents(slug);
+    
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/events/${slug}`);
+    const data = await response.json();
+
+    if (!data.event || !data.event.title) {
+        return notFound();
+    }
+
+    const { _id, title, image, overview, date, time, location, description, mode, audience, agenda, organizer, tags } = data.event;
+
     const EventDeatailItem = (item: string) => {
         switch (item) {
             case "date":
@@ -44,12 +58,7 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
                 return null
         }
     }
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/events/${slug}`);
-    const { event: { _id, title, image, overview, date, time, location, description, mode, audience, agenda, organizer, tags } } = await response.json();
-    console.log(agenda);
-    if (!title) {
-        return notFound();
-    }
+
     return (
         <div className="flex flex-row ml-10 my-10 gap-20" id="event">
             <section className="flex flex-col flex-1 w-0">
@@ -91,7 +100,6 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
                             ))}
                         </ul>
                     </section>
-                    {/* //in the right side */}
                 </div>
                 <div className="flex w-full flex-col gap-4 pt-20">
                     <h2>Similar Events</h2>
@@ -103,7 +111,7 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
                 </div>
             </section>
 
-            <aside className="booking shrink-0 w-[350px] border-l-2 border-gray-800 p-5 max-w-3xl px-16">
+            <aside className="booking shrink-0 w-[350px] border-l-2 border-gray-800 p-5 max-w-xl px-16">
                 <div className="signup-card">
                     <h2> Join the event</h2>
                     <p>Sign up now to secure your spot</p>
@@ -112,6 +120,15 @@ const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
             </aside>
 
         </div>
+    )
+}
+
+const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await params;
+    return (
+        <Suspense fallback={<div className="ml-10 my-10">Loading Event...</div>}>
+            <EventDetailsContent slug={slug} />
+        </Suspense>
     )
 }
 
